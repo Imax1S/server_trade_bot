@@ -1,0 +1,1 @@
+rootProject.name = "com.ioline.invest-trade-bot"
