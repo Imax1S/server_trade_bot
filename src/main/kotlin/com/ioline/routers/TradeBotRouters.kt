@@ -22,28 +22,9 @@ import ru.tinkoff.piapi.core.InvestApi
 
 fun Route.tradeBotRouting(api: InvestApi) {
     route("/tradeBot") {
-        get {
-            if (tradeBotsStorage.isNotEmpty()) {
-                call.respond(tradeBotsStorage)
-            } else {
-                call.respondText("No bots found", status = HttpStatusCode.OK)
-            }
-        }
+        getAllBots()
 
-        get("{id}") {
-            val id = call.parameters["id"] ?: return@get call.respondText(
-                "Missing id",
-                status = HttpStatusCode.BadRequest
-            )
-
-            val tradeBot =
-                tradeBotsStorage.find { it.id == id } ?: return@get call.respondText(
-                    "No trade bot with id $id",
-                    status = HttpStatusCode.NotFound
-                )
-
-            call.respond(tradeBot)
-        }
+        getBotById()
 
         post("/createBot") {
 //            val tradeBot = tradeBotsStorage.first()
@@ -170,6 +151,33 @@ fun Route.tradeBotRouting(api: InvestApi) {
             } else {
                 call.respondText("Not Found", status = HttpStatusCode.NotFound)
             }
+        }
+    }
+}
+
+private fun Route.getBotById() {
+    get("{id}") {
+        val id = call.parameters["id"] ?: return@get call.respondText(
+            "Missing id",
+            status = HttpStatusCode.BadRequest
+        )
+
+        val tradeBot =
+            tradeBotsStorage.find { it.id == id } ?: return@get call.respondText(
+                "No trade bot with id $id",
+                status = HttpStatusCode.NotFound
+            )
+
+        call.respond(tradeBot)
+    }
+}
+
+private fun Route.getAllBots() {
+    get("/allBots") {
+        if (tradeBotsStorage.isNotEmpty()) {
+            call.respond(tradeBotsStorage)
+        } else {
+            call.respondText("No bots found", status = HttpStatusCode.OK)
         }
     }
 }
