@@ -5,7 +5,7 @@ import com.ioline.data.models.StrategyType
 import com.ioline.data.models.TradeBot
 import com.ioline.data.models.tradeBotsStorage
 import com.ioline.strategies.feeds.tinkoff_api.TinkoffFeedHistoricFeed
-import com.ioline.tradebot.data.models.TimePeriod
+import com.ioline.data.models.TimePeriod
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -26,20 +26,7 @@ fun Route.tradeBotRouting(api: InvestApi) {
 
         getBotById()
 
-        post("/createBot") {
-//            val tradeBot = tradeBotsStorage.first()
-            var tradeBot: TradeBot? = null
-            try {
-                tradeBot = call.receive<TradeBot>()
-            } catch (e: Exception) {
-                println(e.message)
-            }
-            tradeBot ?: return@post call.respondText("Cannot create bot", status = HttpStatusCode.BadRequest)
-
-            tradeBotsStorage.add(tradeBot)
-            call.respond(tradeBot)
-            call.respondText("Trade bot stored correctly", status = HttpStatusCode.Created)
-        }
+        postCreateBot()
 
         post("/run/{id}") {
             val id = call.parameters["id"] ?: return@post call.respondText(
@@ -53,7 +40,7 @@ fun Route.tradeBotRouting(api: InvestApi) {
                     status = HttpStatusCode.BadRequest
                 )
 
-            val strategy = when (tradeBot.strategy.type) {
+            val strategy = when (tradeBot.strategy?.type) {
                 StrategyType.EMA -> {
                     val fastPeriod = tradeBot.strategy.param1.toIntOrNull()
                     val slowPeriod = tradeBot.strategy.param2.toIntOrNull()
@@ -81,17 +68,20 @@ fun Route.tradeBotRouting(api: InvestApi) {
                 StrategyType.CUSTOM -> {
                     TaLibStrategy()
                 }
+
+                null -> TODO()
             }
 
             val tinkoffFeed = TinkoffFeedHistoricFeed()
-            val timeNumber = tradeBot.timeSettings.start.toIntOrNull() ?: 0
-            val tradingPeriod = when (tradeBot.timeSettings.period) {
+            val timeNumber = tradeBot.timeSettings?.start?.toIntOrNull() ?: 0
+            val tradingPeriod = when (tradeBot.timeSettings?.period) {
                 TimePeriod.MINUTES -> timeNumber.minutes
                 TimePeriod.HOURS -> timeNumber.hours
                 TimePeriod.DAYS -> timeNumber.days
                 TimePeriod.WEEKS -> timeNumber.weeks
                 TimePeriod.MONTHS -> timeNumber.months
                 TimePeriod.YEARS -> timeNumber.years
+                null -> TODO()
             }
             tinkoffFeed.retrieve(
                 tradeBot.instrumentsFIGI,
@@ -155,8 +145,24 @@ fun Route.tradeBotRouting(api: InvestApi) {
     }
 }
 
+private fun Route.postCreateBot() {
+    post("/createBot") {
+        var tradeBot: TradeBot? = null
+        try {
+            tradeBot = call.receive<TradeBot>()
+        } catch (e: Exception) {
+            println(e.message)
+        }
+        tradeBot ?: return@post call.respondText("Cannot create bot", status = HttpStatusCode.BadRequest)
+
+        tradeBotsStorage.add(tradeBot)
+        call.respond(tradeBot)
+        call.respondText("Trade bot stored correctly", status = HttpStatusCode.Created)
+    }
+}
+
 private fun Route.getBotById() {
-    get("{id}") {
+    get("bot/{id}") {
         val id = call.parameters["id"] ?: return@get call.respondText(
             "Missing id",
             status = HttpStatusCode.BadRequest
