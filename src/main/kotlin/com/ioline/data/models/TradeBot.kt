@@ -24,6 +24,7 @@ val tradeBotsStorage = mutableListOf(
     TradeBot(
         id = "1",
         name = "EMA Strategy",
+        description = "Super bot, which uses super power",
         strategy = Strategy(
             type = StrategyType.EMA,
             param1 = "5",
@@ -32,15 +33,93 @@ val tradeBotsStorage = mutableListOf(
         isActive = false,
         instrumentsFIGI = listOf(
             "TCSS09805522", //yndx
-            "BBG00QPYJ5H0" //tcsg
+//            "BBG00QPYJ5H0" //tcsg
         ),
         marketEnvironment = MarketEnvironment.HISTORICAL_DATA,
         timeSettings = TimeSettings(
-            CandleInterval.CANDLE_INTERVAL_HOUR,
+            CandleInterval.CANDLE_INTERVAL_DAY,
             "",
             "",
             TimePeriod.DAYS
-        )
+        ),
+        operations = listOf(
+            Operation(
+                type = OrderType.BUY,
+                asset = Instrument(
+                    classCode = "adipisci",
+                    figi = "deserunt",
+                    first1dayCandleDate = "sapien",
+                    first1minCandleDate = "vulputate",
+                    forIisFlag = false,
+                    instrumentType = "fermentum",
+                    name = "Louisa Underwood",
+                    ticker = "principes",
+                    uid = "nisi",
+                    price = 4.5
+                ),
+                price = 6.7,
+                date = "indoctum",
+                size = 2520,
+                pnlValue = 12.13,
+            ),
+            Operation(
+                type = OrderType.SELL,
+                asset = Instrument(
+                    classCode = "adipisci",
+                    figi = "deserunt",
+                    first1dayCandleDate = "sapien",
+                    first1minCandleDate = "vulputate",
+                    forIisFlag = false,
+                    instrumentType = "fermentum",
+                    name = "Louisa Underwood",
+                    ticker = "principes",
+                    uid = "nisi",
+                    price = 4.5
+                ),
+                price = 6.7,
+                date = "indoctum",
+                size = 2520,
+                pnlValue = 12.13,
+            ),
+            Operation(
+                type = OrderType.BUY,
+                asset = Instrument(
+                    classCode = "adipisci",
+                    figi = "deserunt",
+                    first1dayCandleDate = "sapien",
+                    first1minCandleDate = "vulputate",
+                    forIisFlag = false,
+                    instrumentType = "fermentum",
+                    name = "Louisa Underwood",
+                    ticker = "principes",
+                    uid = "nisi",
+                    price = 4.5
+                ),
+                price = 6.7,
+                date = "indoctum",
+                size = 2520,
+                pnlValue = 12.13,
+            ),
+            Operation(
+                type = OrderType.BUY,
+                asset = Instrument(
+                    classCode = "adipisci",
+                    figi = "deserunt",
+                    first1dayCandleDate = "sapien",
+                    first1minCandleDate = "vulputate",
+                    forIisFlag = false,
+                    instrumentType = "fermentum",
+                    name = "Louisa Underwood",
+                    ticker = "principes",
+                    uid = "nisi",
+                    price = 4.5
+                ),
+                price = 6.7,
+                date = "indoctum",
+                size = 2520,
+                pnlValue = 12.13,
+            )
+        ),
     ),
     TradeBot(
         id = "2",

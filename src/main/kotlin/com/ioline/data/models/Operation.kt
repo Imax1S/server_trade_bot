@@ -8,6 +8,8 @@ data class Operation(
     val asset: Instrument,
     val price: Double,
     val date: String,
+    val size: Int,
+    val pnlValue: Double
 )
 
 enum class OrderType {

@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class HistoricalResult(
     val finalBalance: Double,
     val yield: Double,
-    val history: List<Double> = emptyList()
+    val history: List<Double> = emptyList(),
+    val operations: List<Operation> = emptyList()
 )
