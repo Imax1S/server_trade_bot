@@ -3,6 +3,7 @@ package com.ioline.plugins
 import com.google.protobuf.util.JsonFormat
 import com.ioline.common.sandboxToken
 import com.ioline.common.toDouble
+import com.ioline.database.Repository
 import com.ioline.routers.tradeBotRouting
 import com.ioline.strategies.StrategyFactory
 import io.ktor.http.*
@@ -14,6 +15,7 @@ import ru.tinkoff.piapi.core.InvestApi
 fun Application.configureRouting() {
     val api = InvestApi.create(sandboxToken)
     val strategyFactory = StrategyFactory()
+    val repository = Repository()
 
     routing {
         get("/") {
@@ -36,7 +38,7 @@ fun Application.configureRouting() {
 
             call.respondText(price.toString())
         }
-        tradeBotRouting(api, strategyFactory)
+        tradeBotRouting(strategyFactory, repository)
     }
 }
 

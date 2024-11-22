@@ -1,6 +1,7 @@
 package com.ioline.routers
 
 import com.ioline.data.models.*
+import com.ioline.database.Repository
 import com.ioline.strategies.StrategyFactory
 import com.ioline.strategies.TimeSettingsParser
 import com.ioline.strategies.feeds.tinkoff_api.TinkoffFeedHistoricFeed
@@ -16,17 +17,17 @@ import org.roboquant.common.RUB
 import org.roboquant.common.Wallet
 import org.roboquant.metrics.AccountMetric
 import org.roboquant.policies.FlexPolicy
-import ru.tinkoff.piapi.core.InvestApi
+import java.util.*
 
-fun Route.tradeBotRouting(api: InvestApi, strategyFactory: StrategyFactory) {
+fun Route.tradeBotRouting(strategyFactory: StrategyFactory, repository: Repository) {
     route("/tradeBot") {
-        getAllBots()
+        getAllBots(repository)
 
-        getBotById()
+        getBotById(repository)
 
-        postCreateBot()
+        postCreateBot(repository)
 
-        getRunBot(strategyFactory)
+        getRunBot(strategyFactory, repository)
 
         get("turnOff/{id}") {
 //            val id = call.parameters["id"] ?: return@get call.respondText(
@@ -56,14 +57,14 @@ fun Route.tradeBotRouting(api: InvestApi, strategyFactory: StrategyFactory) {
     }
 }
 
-private fun Route.getRunBot(strategyFactory: StrategyFactory) {
+private fun Route.getRunBot(strategyFactory: StrategyFactory, repository: Repository) {
     post("/run/{id}") {
         val id = call.parameters["id"] ?: return@post call.respondText(
             "Missing id",
             status = HttpStatusCode.BadRequest
         )
 
-        val tradeBot = tradeBotsStorage.find { it.id == id }
+        val tradeBot = repository.getTradeBotById(id)
             ?: return@post call.respondText(
                 "No bot with id=$id",
                 status = HttpStatusCode.BadRequest
@@ -135,7 +136,7 @@ private fun Route.getRunBot(strategyFactory: StrategyFactory) {
     }
 }
 
-private fun Route.postCreateBot() {
+private fun Route.postCreateBot(repository: Repository) {
     post("/createBot") {
         var tradeBot: TradeBot? = null
         try {
@@ -145,33 +146,33 @@ private fun Route.postCreateBot() {
         }
         tradeBot ?: return@post call.respondText("Cannot create bot", status = HttpStatusCode.BadRequest)
 
-        tradeBotsStorage.add(tradeBot)
+        repository.createBot(tradeBot.copy(id = UUID.randomUUID().toString()))
         call.respond(tradeBot)
         call.respondText("Trade bot stored correctly", status = HttpStatusCode.Created)
     }
 }
 
-private fun Route.getBotById() {
+private fun Route.getBotById(repository: Repository) {
     get("bot/{id}") {
         val id = call.parameters["id"] ?: return@get call.respondText(
             "Missing id",
             status = HttpStatusCode.BadRequest
         )
 
-        val tradeBot =
-            tradeBotsStorage.find { it.id == id } ?: return@get call.respondText(
-                "No trade bot with id $id",
-                status = HttpStatusCode.NotFound
-            )
+        val tradeBot = repository.getTradeBotById(id) ?: return@get call.respondText(
+            "No trade bot with id $id",
+            status = HttpStatusCode.NotFound
+        )
 
         call.respond(tradeBot)
     }
 }
 
-private fun Route.getAllBots() {
+private fun Route.getAllBots(repository: Repository) {
+    val allBots = repository.getAllTradeBots()
     get("/allBots") {
-        if (tradeBotsStorage.isNotEmpty()) {
-            call.respond(tradeBotsStorage)
+        if (allBots.isNotEmpty()) {
+            call.respond(allBots)
         } else {
             call.respondText("No bots found", status = HttpStatusCode.OK)
         }

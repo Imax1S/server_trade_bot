@@ -1,4 +1,3 @@
-import io.ktor.plugin.features.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val ktor_version: String by project
@@ -38,20 +37,26 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
     implementation("com.google.protobuf:protobuf-java-util:3.0.0-beta-2")
 
+    //db
+    implementation("org.jetbrains.exposed:exposed-core:0.43.0")
+    implementation("org.jetbrains.exposed:exposed-dao:0.43.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.43.0")
+    // JDBC-драйвер для выбранной базы данных (пример для PostgreSQL)
+    implementation("org.postgresql:postgresql:42.6.0")
+    // HikariCP для пулов соединений
+    implementation("com.zaxxer:HikariCP:5.0.1")
+
 
     implementation("org.roboquant:roboquant-ibkr:1.4.0")
     implementation("org.roboquant:roboquant-ta:1.4.0")
-//    implementation("org.slf4j:slf4j-log4j12:1.7.29")
 
 
     //log
-//    implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("org.slf4j:slf4j-api:2.0.7")
     implementation("org.slf4j:slf4j-simple:2.0.7")
 
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
-//    implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
