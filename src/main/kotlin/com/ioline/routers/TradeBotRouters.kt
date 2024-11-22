@@ -169,12 +169,8 @@ private fun Route.getBotById(repository: Repository) {
 }
 
 private fun Route.getAllBots(repository: Repository) {
-    val allBots = repository.getAllTradeBots()
     get("/allBots") {
-        if (allBots.isNotEmpty()) {
-            call.respond(allBots)
-        } else {
-            call.respondText("No bots found", status = HttpStatusCode.OK)
-        }
+        val allBots = repository.getAllTradeBots()
+        call.respond(allBots)
     }
 }

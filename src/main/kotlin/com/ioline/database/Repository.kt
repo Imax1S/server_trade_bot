@@ -16,6 +16,7 @@ class Repository {
                 bot[name] = tradeBot.name
                 bot[description] = tradeBot.description
                 bot[isActive] = tradeBot.isActive
+                bot[marketEnvironment] = tradeBot.marketEnvironment.name
             }
         } get BotTable.id
     }
