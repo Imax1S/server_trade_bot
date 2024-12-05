@@ -2,7 +2,7 @@ package com.ioline.database
 
 import org.jetbrains.exposed.sql.Table
 
-const val MAX_VARCHAR_LENGTH = 128
+private const val MAX_VARCHAR_LENGTH = 128
 
 object BotTable : Table("bots") {
     val id = varchar("id", 50)

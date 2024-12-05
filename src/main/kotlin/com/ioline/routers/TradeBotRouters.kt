@@ -1,7 +1,7 @@
 package com.ioline.routers
 
 import com.ioline.data.models.*
-import com.ioline.database.Repository
+import com.ioline.database.BotRepository
 import com.ioline.strategies.StrategyFactory
 import com.ioline.strategies.TimeSettingsParser
 import com.ioline.strategies.feeds.tinkoff_api.TinkoffFeedHistoricFeed
@@ -16,18 +16,18 @@ import org.roboquant.brokers.sim.SimBroker
 import org.roboquant.common.RUB
 import org.roboquant.common.Wallet
 import org.roboquant.metrics.AccountMetric
-import org.roboquant.policies.FlexPolicy
+import ru.tinkoff.piapi.contract.v1.CandleInterval
 import java.util.*
 
-fun Route.tradeBotRouting(strategyFactory: StrategyFactory, repository: Repository) {
+fun Route.tradeBotRouting(strategyFactory: StrategyFactory, botRepository: BotRepository) {
     route("/tradeBot") {
-        getAllBots(repository)
+        getAllBots(botRepository)
 
-        getBotById(repository)
+        getBotById(botRepository)
 
-        postCreateBot(repository)
+        postCreateBot(botRepository)
 
-        getRunBot(strategyFactory, repository)
+        getRunBot(strategyFactory, botRepository)
 
         get("turnOff/{id}") {
 //            val id = call.parameters["id"] ?: return@get call.respondText(
@@ -57,14 +57,27 @@ fun Route.tradeBotRouting(strategyFactory: StrategyFactory, repository: Reposito
     }
 }
 
-private fun Route.getRunBot(strategyFactory: StrategyFactory, repository: Repository) {
+private fun Route.getRunBot(strategyFactory: StrategyFactory, botRepository: BotRepository) {
     post("/run/{id}") {
         val id = call.parameters["id"] ?: return@post call.respondText(
             "Missing id",
             status = HttpStatusCode.BadRequest
         )
 
-        val tradeBot = repository.getTradeBotById(id)
+        val tradeBot = botRepository.getTradeBotById(id)?.copy(
+            instrumentsFIGI = listOf("TCSS09805522"),
+            strategy = Strategy(
+                type = StrategyType.EMA,
+                param1 = "3",
+                param2 = "10"
+            ),
+            timeSettings = TimeSettings(
+                interval = CandleInterval.CANDLE_INTERVAL_DAY,
+                start = "lacus",
+                end = "inani",
+                period = TimePeriod.YEARS
+            )
+        )
             ?: return@post call.respondText(
                 "No bot with id=$id",
                 status = HttpStatusCode.BadRequest
@@ -98,15 +111,15 @@ private fun Route.getRunBot(strategyFactory: StrategyFactory, repository: Reposi
         )
 
         val broker = SimBroker(
-            initialDeposit = Wallet(100_000.RUB),
+            initialDeposit = Wallet(1_000_000.RUB),
         )
-        val policy = FlexPolicy(orderPercentage = 1.0)
+//        val policy = FlexPolicy(orderPercentage = 1.0)
 
         val metric1 = AccountMetric()
         val bot = Roboquant(
             strategy = strategy,
             metric1,
-            policy = policy,
+//            policy = policy,
             broker = broker
         )
         bot.run(tinkoffFeed)
@@ -136,7 +149,7 @@ private fun Route.getRunBot(strategyFactory: StrategyFactory, repository: Reposi
     }
 }
 
-private fun Route.postCreateBot(repository: Repository) {
+private fun Route.postCreateBot(botRepository: BotRepository) {
     post("/createBot") {
         var tradeBot: TradeBot? = null
         try {
@@ -146,20 +159,20 @@ private fun Route.postCreateBot(repository: Repository) {
         }
         tradeBot ?: return@post call.respondText("Cannot create bot", status = HttpStatusCode.BadRequest)
 
-        repository.createBot(tradeBot.copy(id = UUID.randomUUID().toString()))
+        botRepository.createBot(tradeBot.copy(id = UUID.randomUUID().toString()))
         call.respond(tradeBot)
         call.respondText("Trade bot stored correctly", status = HttpStatusCode.Created)
     }
 }
 
-private fun Route.getBotById(repository: Repository) {
+private fun Route.getBotById(botRepository: BotRepository) {
     get("bot/{id}") {
         val id = call.parameters["id"] ?: return@get call.respondText(
             "Missing id",
             status = HttpStatusCode.BadRequest
         )
 
-        val tradeBot = repository.getTradeBotById(id) ?: return@get call.respondText(
+        val tradeBot = botRepository.getTradeBotById(id) ?: return@get call.respondText(
             "No trade bot with id $id",
             status = HttpStatusCode.NotFound
         )
@@ -168,9 +181,9 @@ private fun Route.getBotById(repository: Repository) {
     }
 }
 
-private fun Route.getAllBots(repository: Repository) {
+private fun Route.getAllBots(botRepository: BotRepository) {
     get("/allBots") {
-        val allBots = repository.getAllTradeBots()
+        val allBots = botRepository.getAllTradeBots()
         call.respond(allBots)
     }
 }
