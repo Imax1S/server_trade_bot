@@ -28,32 +28,6 @@ fun Route.tradeBotRouting(strategyFactory: StrategyFactory, botRepository: BotRe
         postCreateBot(botRepository)
 
         getRunBot(strategyFactory, botRepository)
-
-        get("turnOff/{id}") {
-//            val id = call.parameters["id"] ?: return@get call.respondText(
-//                "Missing id",
-//                status = HttpStatusCode.BadRequest
-//            )
-//            val strategy = strategiesStorage.find { it.tradeBot.id == id }
-//            strategy?.tradeBot?.isActive = false
-//
-//            if (strategy == null) {
-//                return@get call.respondText(
-//                    "No bot with id",
-//                    status = HttpStatusCode.BadRequest
-//                )
-//            }
-        }
-
-        delete("{id?}") {
-            val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
-
-            if (tradeBotsStorage.removeIf { it.id == id }) {
-                call.respondText("Trade bot removed correctly", status = HttpStatusCode.Accepted)
-            } else {
-                call.respondText("Not Found", status = HttpStatusCode.NotFound)
-            }
-        }
     }
 }
 

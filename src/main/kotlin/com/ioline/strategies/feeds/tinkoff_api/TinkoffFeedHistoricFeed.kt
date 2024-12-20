@@ -3,7 +3,6 @@ package com.ioline.strategies.feeds.tinkoff_api
 import com.ioline.common.sandboxToken
 import com.ioline.common.toDouble
 import org.roboquant.common.*
-import org.roboquant.common.Currency
 import org.roboquant.feeds.HistoricPriceFeed
 import org.roboquant.feeds.PriceBar
 import ru.tinkoff.piapi.contract.v1.CandleInterval
@@ -16,16 +15,11 @@ import java.time.ZonedDateTime
 
 
 class TinkoffFeedHistoricFeed(private val adjClose: Boolean = true) : HistoricPriceFeed() {
-    val tinkoffApi = InvestApi.create(sandboxToken)
+    private val tinkoffApi = InvestApi.create(sandboxToken)
 
-    private val stockData: MarketDataService
+    private val stockData: MarketDataService = tinkoffApi.marketDataService
     private val logger = Logging.getLogger(TinkoffFeedHistoricFeed::class)
     private val zoneId: ZoneId = ZoneId.of("Europe/Moscow")
-
-
-    init {
-        stockData = tinkoffApi.marketDataService
-    }
 
     private val availableStocks: Map<String, Asset> by lazy {
         Tinkoff.getAvailableStocks(tinkoffApi)
@@ -59,7 +53,6 @@ class TinkoffFeedHistoricFeed(private val adjClose: Boolean = true) : HistoricPr
     }
 
     private fun handle(asset: Asset, quotes: List<HistoricCandle>) {
-
         quotes.forEach {
             val action = PriceBar(
                 asset,
@@ -69,7 +62,7 @@ class TinkoffFeedHistoricFeed(private val adjClose: Boolean = true) : HistoricPr
                 it.close.toDouble(),
                 it.volume
             )
-//            if (adjClose) action.adjustClose(it.adjClose)
+
             val now =  Instant.ofEpochSecond(it.time.seconds, it.time.nanos.toLong())
             add(now, action)
         }

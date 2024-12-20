@@ -3,11 +3,12 @@ package com.ioline
 import com.ioline.common.dataBaseConfig
 import com.ioline.database.BotTable
 import com.ioline.plugins.configureRouting
-import com.ioline.plugins.configureSerialization
 import com.zaxxer.hikari.HikariDataSource
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -35,4 +36,10 @@ fun intiDatabase() {
 fun Application.module() {
     configureRouting()
     configureSerialization()
+}
+
+fun Application.configureSerialization() {
+    install(ContentNegotiation) {
+        json()
+    }
 }
